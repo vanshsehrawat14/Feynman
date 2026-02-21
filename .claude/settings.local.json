@@ -16,7 +16,14 @@
       "Bash(cd /c/Users/vansh/newton/backend && node --check src/index.js && echo \"index.js: OK\" 2>&1)",
       "Bash(cd /c/Users/vansh/newton/backend && node --check src/routes/knowledge.js && echo \"knowledge.js: OK\" && node --check src/routes/practice.js && echo \"practice.js: OK\" 2>&1)",
       "Bash(cd /c/Users/vansh/newton/backend && node regen_narration.mjs derivative 2>&1)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(tail:*)",
+      "Bash(cat /proc/1522/cmdline 2>/dev/null | tr '\\\\0' ' ' || ps -p 1522 -o args= 2>/dev/null)",
+      "Bash(echo Backend down:*)",
+      "Bash(sleep 1:*)",
+      "Bash(sleep 2 && curl -s -X POST http://localhost:3001/api/knowledge -H \"Content-Type: application/json\" -d '{\"topic\":\"eigenvalues\"}' | python3 -c \"\nimport sys, json\nd = json.load\\(sys.stdin\\)\nf0 = d['formulas'][0]\nprint\\('First formula:', f0['formula']\\)\nprint\\('Is static \\(Av=lv\\)?:', 'Av' in f0['formula'] or 'λv' in f0['formula'] or 'λ' in f0['formula']\\)\nprint\\('Formulas count:', len\\(d['formulas']\\)\\)\nprint\\('Misconceptions count:', len\\(d['misconceptions']\\)\\)\nprint\\('Summary length:', len\\(d.get\\('summary', ''\\)\\)\\)\n\" 2>/dev/null)",
+      "Bash(kill:*)",
+      "Bash(curl:*)"
     ]
   }
 }

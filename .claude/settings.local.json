@@ -14,7 +14,9 @@
       "Bash(cd /c/Users/vansh/newton/backend && node --input-type=module <<'EOF'\n// Quick syntax check of all key src files\nimport { readFile } from \"fs/promises\";\nconst files = [\n  \"./src/narrate.js\",\n  \"./src/routes/generate.js\",\n  \"./src/server.js\",\n];\nfor \\(const f of files\\) {\n  try {\n    const code = await readFile\\(f, \"utf8\"\\);\n    // Basic checks\n    const hasExport = code.includes\\(\"export\"\\);\n    console.log\\(`OK  ${f}  \\(${code.length} chars, exports: ${hasExport}\\)`\\);\n  } catch \\(e\\) {\n    console.log\\(`ERR ${f}: ${e.message}`\\);\n  }\n}\nEOF)",
       "Bash(cd /c/Users/vansh/newton/backend && node --check src/narrate.js && echo \"narrate.js: OK\" && node --check src/routes/generate.js && echo \"generate.js: OK\" && node --check src/server.js && echo \"server.js: OK\" 2>&1)",
       "Bash(cd /c/Users/vansh/newton/backend && node --check src/index.js && echo \"index.js: OK\" 2>&1)",
-      "Bash(cd /c/Users/vansh/newton/backend && node --check src/routes/knowledge.js && echo \"knowledge.js: OK\" && node --check src/routes/practice.js && echo \"practice.js: OK\" 2>&1)"
+      "Bash(cd /c/Users/vansh/newton/backend && node --check src/routes/knowledge.js && echo \"knowledge.js: OK\" && node --check src/routes/practice.js && echo \"practice.js: OK\" 2>&1)",
+      "Bash(cd /c/Users/vansh/newton/backend && node regen_narration.mjs derivative 2>&1)",
+      "Bash(node:*)"
     ]
   }
 }

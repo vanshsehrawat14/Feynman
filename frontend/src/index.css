@@ -13,6 +13,13 @@
   --text-secondary:#8888a8;
   --text-dim:      #555570;
   --font: 'CMU Serif', 'Lora', 'Georgia', serif;
+
+  --cat-calculus:        #4a90c4;
+  --cat-linalg:          #7c6fa0;
+  --cat-ml:              #3a8c6e;
+  --cat-algo:            #b8860b;
+  --cat-electro:         #8b3a3a;
+  --cat-macro:           #4a6fa0;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,7 +32,14 @@ html, body, #root {
 body {
   font-family: var(--font);
   color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Force serif on every element */
+input, button, select, textarea, label, span, p, h1, h2, h3, h4, h5, h6, a, li, td, th, div {
+  font-family: var(--font);
 }
 
 /* ── Keyframes ───────────────────────────────────────────────────────── */
@@ -86,16 +100,21 @@ body {
   display: block;
   flex-shrink: 0;
 }
-.logo-avatar-svg {
+.logo-avatar-fallback {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   border: 2px solid var(--accent-blue);
   background: var(--bg-tertiary);
   flex-shrink: 0;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+.logo-avatar-fallback svg {
+  width: 48px;
+  height: 48px;
 }
 .logo-title {
   font-family: var(--font);
@@ -124,6 +143,7 @@ body {
   max-width: 100%;
 }
 .search-input {
+  width: 520px;
   flex: 1;
   height: 52px;
   background: var(--bg-tertiary);
@@ -277,10 +297,12 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   margin-bottom: 0.75rem;
+  text-align: center;
 }
 .chips-row {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .chip {
   display: inline-flex;
@@ -291,11 +313,27 @@ body {
   background: transparent;
   font-family: var(--font);
   font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--text-secondary);
   cursor: pointer;
   margin: 4px;
   transition: all 150ms ease;
   line-height: 1.5;
 }
+
+/* Category-specific chip colors */
+.chip[data-cat="calculus"]        { border-color: rgba(74,144,196,0.4); }
+.chip[data-cat="calculus"]:hover  { border-color: #4a90c4; background: rgba(74,144,196,0.1); color: var(--text-primary); }
+.chip[data-cat="linalg"]         { border-color: rgba(124,111,160,0.4); }
+.chip[data-cat="linalg"]:hover   { border-color: #7c6fa0; background: rgba(124,111,160,0.1); color: var(--text-primary); }
+.chip[data-cat="ml"]             { border-color: rgba(58,140,110,0.4); }
+.chip[data-cat="ml"]:hover       { border-color: #3a8c6e; background: rgba(58,140,110,0.1); color: var(--text-primary); }
+.chip[data-cat="algo"]           { border-color: rgba(184,134,11,0.4); }
+.chip[data-cat="algo"]:hover     { border-color: #b8860b; background: rgba(184,134,11,0.1); color: var(--text-primary); }
+.chip[data-cat="electro"]        { border-color: rgba(139,58,58,0.4); }
+.chip[data-cat="electro"]:hover  { border-color: #8b3a3a; background: rgba(139,58,58,0.1); color: var(--text-primary); }
+.chip[data-cat="macro"]          { border-color: rgba(74,111,160,0.4); }
+.chip[data-cat="macro"]:hover    { border-color: #4a6fa0; background: rgba(74,111,160,0.1); color: var(--text-primary); }
 
 /* ── Result section ──────────────────────────────────────────────────── */
 .result-section {
@@ -397,7 +435,7 @@ body {
   border-bottom-color: var(--accent-blue);
 }
 .k-tab-content {
-  padding: 1.2rem;
+  padding: 1.5rem;
   max-height: 520px;
   overflow-y: auto;
 }
@@ -465,14 +503,14 @@ body {
 .miscon-wrong {
   display: block;
   font-family: var(--font);
-  color: #b05050;
+  color: #c45a5a;
   font-size: 0.88rem;
   line-height: 1.5;
 }
 .miscon-right {
   display: block;
   font-family: var(--font);
-  color: #3a9e6e;
+  color: #4aad7e;
   font-size: 0.88rem;
   margin-top: 6px;
   line-height: 1.5;
@@ -493,7 +531,7 @@ body {
   text-align: center;
   padding: 2.5rem 24px 3rem;
   border-top: 1px solid var(--border-subtle);
-  margin-top: auto;
+  margin-top: 4rem;
 }
 .footer-quote {
   font-family: var(--font);
@@ -514,11 +552,13 @@ body {
 @media (max-width: 768px) {
   .site-header { padding-top: 3rem; }
 
-  .logo-avatar, .logo-avatar-svg { width: 40px; height: 40px; }
+  .logo-avatar, .logo-avatar-fallback { width: 40px; height: 40px; }
+  .logo-avatar-fallback svg { width: 40px; height: 40px; }
   .logo-title { font-size: 1.8rem; }
 
   .search-wrap { flex-direction: column; width: 100%; }
   .search-input {
+    width: 100%;
     border-right: 1px solid var(--border-subtle);
     border-bottom: none;
     height: 48px;

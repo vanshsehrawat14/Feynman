@@ -1,17 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 
 const API = "http://localhost:3001";
-const SERIF = "'Noto Serif', Georgia, serif";
+
+const FEYNMAN_PHOTO = "https://upload.wikimedia.org/wikipedia/commons/f/f9/Feynman-richard_p.jpg";
 
 const GROUPS = [
   {
     label: "Calculus",
-    color: "#58C4DD",
+    cat: "calculus",
+    color: "#4a90c4",
     topics: ["Derivatives", "Integrals", "Limits", "Chain Rule"],
   },
   {
     label: "Linear Algebra",
-    color: "#A78BFA",
+    cat: "linalg",
+    color: "#7c6fa0",
     topics: [
       "Vectors", "Vector Addition", "Scalar Multiplication", "Dot Product", "Cross Product",
       "Matrix Multiplication", "Linear Transformations", "Rotation Matrices",
@@ -24,7 +27,8 @@ const GROUPS = [
   },
   {
     label: "Machine Learning",
-    color: "#34D399",
+    cat: "ml",
+    color: "#3a8c6e",
     topics: [
       "Neural Networks", "Gradient Descent", "Backpropagation", "Loss Functions",
       "Overfitting And Underfitting", "Activation Functions", "Learning Rate",
@@ -33,7 +37,8 @@ const GROUPS = [
   },
   {
     label: "Algorithms",
-    color: "#F59E0B",
+    cat: "algo",
+    color: "#b8860b",
     topics: [
       "Bubble Sort", "Quicksort", "Merge Sort", "Binary Search",
       "Depth First Search", "Breadth First Search", "Big O Notation",
@@ -43,7 +48,8 @@ const GROUPS = [
   },
   {
     label: "Electrodynamics",
-    color: "#F472B6",
+    cat: "electro",
+    color: "#8b3a3a",
     topics: [
       "Electric Fields", "Magnetic Fields", "Electromagnetic Induction",
       "Maxwell's Equations", "Wave Propagation",
@@ -51,14 +57,11 @@ const GROUPS = [
   },
   {
     label: "Macroeconomics",
-    color: "#60A5FA",
+    cat: "macro",
+    color: "#4a6fa0",
     topics: ["Supply And Demand", "GDP And Growth", "Inflation", "Interest Rates", "Game Theory"],
   },
 ];
-
-function resetState(setters) {
-  setters.forEach(fn => fn());
-}
 
 export default function App() {
   const [topic, setTopic]               = useState("");
@@ -77,6 +80,7 @@ export default function App() {
   const [loadingKnowledge, setLoadingKnowledge] = useState(false);
 
   const [showAngle, setShowAngle] = useState(false);
+  const [photoError, setPhotoError] = useState(false);
 
   const topicForApi = rawTopic || topic;
 
@@ -141,37 +145,57 @@ export default function App() {
       .finally(() => setLoadingKnowledge(false));
   }, [videoUrl, topicForApi, angle]);
 
-  return (
-    <div style={s.root}>
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <header style={s.header}>
-        <h1 style={s.logo} onClick={goHome} title="Back to home">Feynman</h1>
-        <p style={s.tagline}>Visual explanations of anything, instantly</p>
+  const tabLabels = { formulas: "Key Formulas", misconceptions: "Misconceptions", summary: "Summary" };
 
-        <div style={s.searchWrap}>
+  return (
+    <div className="app">
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <header className="site-header">
+        <div className="logo-row" onClick={goHome} title="Back to home">
+          {!photoError ? (
+            <img
+              className="logo-avatar"
+              src={FEYNMAN_PHOTO}
+              alt="Richard Feynman"
+              onError={() => setPhotoError(true)}
+            />
+          ) : (
+            <div className="logo-avatar-fallback" style={{ display: "flex" }}>
+              <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="23" fill="#1a1a24" stroke="#58c4dd" strokeWidth="2" />
+                <text x="24" y="31" textAnchor="middle" fill="#e8e8f0" fontFamily="'CMU Serif','Lora','Georgia',serif" fontSize="24" fontWeight="400">F</text>
+              </svg>
+            </div>
+          )}
+          <span className="logo-title">Feynman</span>
+        </div>
+
+        <p className="tagline">Mathematics and sciences with a distinct visual perspective</p>
+
+        <div className="search-wrap">
           <input
-            style={s.searchInput}
-            placeholder="What do you want to understand today?"
+            className="search-input"
+            placeholder="What do you want to understand?"
             value={topic}
             onChange={e => setTopic(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleGenerate()}
           />
           <button
-            style={{ ...s.searchBtn, opacity: loading || !topic.trim() ? 0.45 : 1 }}
+            className="search-btn"
             onClick={() => handleGenerate()}
             disabled={loading || !topic.trim()}
           >
-            {loading ? "Thinking…" : "Explain"}
+            Generate
           </button>
         </div>
 
-        <div style={s.angleRow}>
-          <button style={s.angleToggle} onClick={() => setShowAngle(v => !v)}>
+        <div className="angle-row">
+          <button className="angle-toggle" onClick={() => setShowAngle(v => !v)}>
             {showAngle ? "▲ Hide" : "▼ Personalize angle"}
           </button>
           {showAngle && (
             <input
-              style={s.angleInput}
+              className="angle-input"
               placeholder="e.g. emphasize CS applications, connect to ML, focus on engineering"
               value={angle}
               onChange={e => setAngle(e.target.value)}
@@ -179,81 +203,95 @@ export default function App() {
           )}
         </div>
 
-        {loading && <p style={s.hint}>Generating animation — this takes ~5 s for pre-built topics…</p>}
-        {error   && <p style={s.errTxt}>{error}</p>}
+        {loading && (
+          <div className="loading-state">
+            <div className="spinner" />
+            <p className="loading-text">Generating your explanation...</p>
+          </div>
+        )}
+        {error && <p className="error-text">{error}</p>}
       </header>
 
       {/* ── Video result ───────────────────────────────────────────────── */}
       {videoUrl && (
-        <section style={s.resultSection}>
-          <div style={s.videoCol}>
+        <section className="result-section">
+          <div className="video-col">
             <video
+              className="video-player"
               key={useNarrated && narratedUrl ? narratedUrl : videoUrl}
               src={useNarrated && narratedUrl ? narratedUrl : videoUrl}
               controls
               autoPlay
-              style={s.video}
             />
-            <div style={s.videoMeta}>
-              <p style={s.videoTitle}>{displayTitle}</p>
+            <p className="video-title-text">{displayTitle}</p>
+            <div className="video-meta-row">
               {narratedUrl && (
                 <button
-                  style={{ ...s.narrBtn, background: useNarrated ? "#58C4DD" : "#1E1E2E", color: useNarrated ? "#0A0A0F" : "#6E6E8A" }}
+                  className="narr-btn"
+                  style={{
+                    background: useNarrated ? "#58c4dd" : "#1a1a24",
+                    color: useNarrated ? "#0d0d12" : "#8888a8",
+                  }}
                   onClick={() => setUseNarrated(v => !v)}
                 >
                   {useNarrated ? "🔊 Narrated" : "🔇 Silent"}
                 </button>
               )}
             </div>
+            <div className="video-divider" />
             {explanation && (
-              <div style={s.explCard}>
-                <p style={s.explText}>{explanation}</p>
+              <div className="expl-card">
+                <p className="expl-text">{explanation}</p>
               </div>
             )}
           </div>
 
-          <aside style={s.knowledgePanel}>
-            <div style={s.tabs}>
+          <aside className="knowledge-panel">
+            <div className="k-tabs">
               {["formulas", "misconceptions", "summary"].map(t => (
-                <button key={t} style={{ ...s.tab, ...(knowledgeTab === t ? s.tabActive : {}) }} onClick={() => setKnowledgeTab(t)}>
-                  {t === "formulas" ? "Key Formulas" : t === "misconceptions" ? "Misconceptions" : "Summary"}
+                <button
+                  key={t}
+                  className={`k-tab${knowledgeTab === t ? " active" : ""}`}
+                  onClick={() => setKnowledgeTab(t)}
+                >
+                  {tabLabels[t]}
                 </button>
               ))}
             </div>
-            <div style={s.tabContent}>
+            <div className="k-tab-content">
               {loadingKnowledge ? (
-                <div style={s.skeletonList}>
+                <div className="skel-list">
                   {[1, 2, 3].map(i => (
-                    <div key={i} style={s.skeletonCard}>
-                      <div style={s.skeletonLine} />
-                      <div style={{ ...s.skeletonLine, width: "65%", marginTop: 8 }} />
+                    <div key={i} className="skel-card">
+                      <div className="skel-line" />
+                      <div className="skel-line" style={{ width: "65%", marginTop: 8 }} />
                     </div>
                   ))}
                 </div>
               ) : (
                 <>
                   {knowledgeTab === "formulas" && (
-                    <div style={s.formulaList}>
+                    <div className="formula-list">
                       {knowledge.formulas.map((f, i) => (
-                        <div key={i} style={s.formulaCard}>
-                          <span style={s.formulaText}>{f.formula}</span>
-                          <span style={s.formulaMeaning}>{f.meaning}</span>
-                          <button style={s.copyBtn} onClick={() => navigator.clipboard?.writeText(f.formula + " — " + (f.meaning || ""))}>Copy</button>
+                        <div key={i} className="formula-card">
+                          <span className="formula-text">{f.formula}</span>
+                          <span className="formula-meaning">{f.meaning}</span>
+                          <button className="copy-btn" onClick={() => navigator.clipboard?.writeText(f.formula + " — " + (f.meaning || ""))}>Copy</button>
                         </div>
                       ))}
                     </div>
                   )}
                   {knowledgeTab === "misconceptions" && (
-                    <div style={s.misconList}>
+                    <div className="miscon-list">
                       {knowledge.misconceptions.map((m, i) => (
-                        <div key={i} style={s.misconCard}>
-                          <span style={s.misconWrong}>✗ {m.wrong}</span>
-                          <span style={s.misconRight}>✓ {m.correct}</span>
+                        <div key={i} className="miscon-card">
+                          <span className="miscon-wrong">✗ {m.wrong}</span>
+                          <span className="miscon-right">✓ {m.correct}</span>
                         </div>
                       ))}
                     </div>
                   )}
-                  {knowledgeTab === "summary" && <p style={s.summaryText}>{knowledge.summary}</p>}
+                  {knowledgeTab === "summary" && <p className="summary-text">{knowledge.summary}</p>}
                 </>
               )}
             </div>
@@ -261,84 +299,44 @@ export default function App() {
         </section>
       )}
 
-      {/* ── Topic chips ────────────────────────────────────────────────── */}
+      {/* ── Divider + Topic chips ──────────────────────────────────────── */}
       {!videoUrl && !loading && (
-        <main style={s.topicsMain}>
-          {GROUPS.map(g => (
-            <div key={g.label} style={s.group}>
-              <h2 style={{ ...s.groupLabel, color: g.color }}>{g.label}</h2>
-              <div style={s.chips}>
-                {g.topics.map(t => (
-                  <button
-                    key={t}
-                    style={{ ...s.chip, borderColor: g.color + "55", color: g.color }}
-                    onClick={() => { setTopic(t); handleGenerate(t); }}
-                  >
-                    {t}
-                  </button>
-                ))}
+        <>
+          <div className="divider-row">
+            <div className="divider-line" />
+            <span className="divider-label">or explore a topic</span>
+            <div className="divider-line" />
+          </div>
+
+          <main className="topics-main">
+            {GROUPS.map(g => (
+              <div key={g.label}>
+                <h2 className="group-label" style={{ color: g.color }}>{g.label}</h2>
+                <div className="chips-row">
+                  {g.topics.map(t => (
+                    <button
+                      key={t}
+                      className="chip"
+                      data-cat={g.cat}
+                      onClick={() => { setTopic(t); handleGenerate(t); }}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </main>
+            ))}
+          </main>
+        </>
       )}
 
       {/* ── Footer quote ───────────────────────────────────────────────── */}
-      <footer style={s.footer}>
-        <p style={s.quote}>
+      <footer className="site-footer">
+        <p className="footer-quote">
           &ldquo;If you cannot explain something simply, you do not understand it yet.&rdquo;
         </p>
-        <p style={s.quoteBy}>— Richard Feynman</p>
+        <p className="footer-by">— Richard Feynman</p>
       </footer>
     </div>
   );
 }
-
-const s = {
-  root: { fontFamily: SERIF, background: "#0A0A0F", minHeight: "100vh", color: "#E8E8F0", display: "flex", flexDirection: "column", alignItems: "center" },
-  header: { width: "100%", maxWidth: 720, textAlign: "center", padding: "56px 24px 32px" },
-  logo: { fontFamily: SERIF, fontSize: 56, fontWeight: 700, margin: "0 0 8px", letterSpacing: -1, color: "#E8E8F0", cursor: "pointer", display: "inline-block" },
-  tagline: { fontFamily: SERIF, fontSize: 16, color: "#6E6E8A", margin: "0 0 36px", fontStyle: "italic" },
-  searchWrap: { display: "flex", gap: 10, width: "100%" },
-  searchInput: { flex: 1, fontFamily: SERIF, fontSize: 17, padding: "14px 20px", background: "#13131F", border: "1px solid #1E1E2E", borderRadius: 10, color: "#E8E8F0", outline: "none" },
-  searchBtn: { fontFamily: SERIF, fontSize: 16, fontWeight: 700, padding: "14px 28px", background: "#58C4DD", color: "#0A0A0F", border: "none", borderRadius: 10, cursor: "pointer", whiteSpace: "nowrap" },
-  angleRow: { marginTop: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 },
-  angleToggle: { fontFamily: SERIF, fontSize: 13, background: "none", border: "none", color: "#6E6E8A", cursor: "pointer", padding: 0 },
-  angleInput: { width: "100%", fontFamily: SERIF, fontSize: 14, padding: "10px 16px", background: "#13131F", border: "1px solid #1E1E2E", borderRadius: 8, color: "#E8E8F0", outline: "none" },
-  hint: { fontFamily: SERIF, color: "#6E6E8A", fontSize: 14, margin: "12px 0 0" },
-  errTxt: { fontFamily: SERIF, color: "#F472B6", marginTop: 10, fontSize: 14 },
-  resultSection: { display: "flex", gap: 24, width: "100%", maxWidth: 1200, padding: "0 24px 40px", flexWrap: "wrap" },
-  videoCol: { flex: 1, minWidth: 400 },
-  video: { width: "100%", borderRadius: 12, boxShadow: "0 8px 48px rgba(0,0,0,0.7)" },
-  videoMeta: { display: "flex", alignItems: "center", gap: 12, marginTop: 10, flexWrap: "wrap" },
-  videoTitle: { fontFamily: SERIF, margin: 0, fontSize: 18, color: "#E8E8F0", flex: 1, fontStyle: "italic" },
-  narrBtn: { fontFamily: SERIF, fontSize: 13, fontWeight: 600, padding: "5px 14px", border: "none", borderRadius: 20, cursor: "pointer" },
-  explCard: { marginTop: 16, background: "#0F0F1A", borderRadius: 10, padding: "16px 20px", borderLeft: "3px solid #58C4DD" },
-  explText: { fontFamily: SERIF, margin: 0, color: "#B8B8CC", lineHeight: 1.7, fontSize: 15 },
-  knowledgePanel: { width: 320, minWidth: 280, background: "#0F0F1A", borderRadius: 12, overflow: "hidden", border: "1px solid #1E1E2E", alignSelf: "flex-start" },
-  tabs: { display: "flex", borderBottom: "1px solid #1E1E2E" },
-  tab: { flex: 1, fontFamily: SERIF, padding: "11px 8px", background: "transparent", border: "none", color: "#6E6E8A", cursor: "pointer", fontSize: 12, fontWeight: 600 },
-  tabActive: { background: "#13131F", color: "#E8E8F0" },
-  tabContent: { padding: 16, maxHeight: 460, overflowY: "auto" },
-  formulaList: { display: "flex", flexDirection: "column", gap: 12 },
-  formulaCard: { background: "#13131F", padding: 12, borderRadius: 8, borderLeft: "3px solid #58C4DD" },
-  formulaText: { fontFamily: SERIF, display: "block", color: "#E8E8F0", fontWeight: 600, fontSize: 14 },
-  formulaMeaning: { fontFamily: SERIF, display: "block", fontSize: 13, color: "#6E6E8A", marginTop: 4 },
-  copyBtn: { fontFamily: SERIF, marginTop: 8, padding: "4px 10px", fontSize: 11, background: "#1E1E2E", color: "#6E6E8A", border: "none", borderRadius: 4, cursor: "pointer" },
-  misconList: { display: "flex", flexDirection: "column", gap: 12 },
-  misconCard: { background: "#13131F", padding: 12, borderRadius: 8 },
-  misconWrong: { fontFamily: SERIF, display: "block", color: "#F472B6", fontSize: 13 },
-  misconRight: { fontFamily: SERIF, display: "block", color: "#34D399", marginTop: 6, fontSize: 13 },
-  summaryText: { fontFamily: SERIF, color: "#B8B8CC", lineHeight: 1.7, fontSize: 14, whiteSpace: "pre-wrap" },
-  topicsMain: { width: "100%", maxWidth: 900, padding: "0 24px 48px", display: "flex", flexDirection: "column", gap: 28 },
-  group: {},
-  groupLabel: { fontFamily: SERIF, fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, margin: "0 0 10px" },
-  chips: { display: "flex", gap: 8, flexWrap: "wrap" },
-  chip: { fontFamily: SERIF, padding: "6px 14px", borderRadius: 20, background: "#0F0F1A", border: "1px solid", cursor: "pointer", fontSize: 13, fontWeight: 400 },
-  skeletonList: { display: "flex", flexDirection: "column", gap: 12 },
-  skeletonCard: { background: "#13131F", padding: 12, borderRadius: 8, borderLeft: "3px solid #1E1E2E" },
-  skeletonLine: { height: 11, background: "#1E1E2E", borderRadius: 3, width: "100%" },
-  footer: { width: "100%", textAlign: "center", padding: "32px 24px 40px", borderTop: "1px solid #1E1E2E", marginTop: "auto" },
-  quote: { fontFamily: SERIF, fontStyle: "italic", fontSize: 16, color: "#6E6E8A", margin: "0 0 8px" },
-  quoteBy: { fontFamily: SERIF, fontSize: 14, color: "#3A3A5C", margin: 0 },
-};
